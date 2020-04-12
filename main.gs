@@ -2,7 +2,7 @@
 //稽古日程と日付を比較し実行
 function slackMentionByEvtSheet() {
   saveCalenderToSheet("Event");
-  let dat = Event.getDataRange().getValues();//イベントシートのデータを配列に取得
+  let dat = EventSheet.getDataRange().getValues();//イベントシートのデータを配列に取得
   let tomorrow = new Date()
   tomorrow.setDate(new Date().getDate()+1);//明日の日付
   for (i = 1; i < dat.length; i++) {

@@ -15,7 +15,7 @@ let sheetID = PropertiesService.getScriptProperties().getProperty("SHEET_ID");
 let spSheet = SpreadsheetApp.openById(sheetID);
 
 /*各シートを取得*/
-let Event = spSheet.getSheetByName("Event");
+let EventSheet = spSheet.getSheetByName("Event");
 let Actor = spSheet.getSheetByName("Actor");
 let AnswerSheet = spSheet.getSheetByName("Answer"); 
 let PracticeSheet = spSheet.getSheetByName("PracticeDay");
@@ -29,42 +29,6 @@ let ConstantsSheet = spSheet.getSheetByName("SystemConstants");
 let postUrl = PropertiesService.getScriptProperties().getProperty('POST_URL');  //slackのWebhook URL
 let postChannel = PropertiesService.getScriptProperties().getProperty('POST_CHANNEL');  //ポストするスラックのチャンネル
 let username = PropertiesService.getScriptProperties().getProperty('WEBHOOKS_USER_NAME');  //slackでリマインドするbotの表示名
-
-
-/**
- * SlackにPostするためのクラス
- * @constructor
- * @param{string} message 表示するメッセージ
- */
-class Envelope {
-  constructor(message){
-    this.message = message;
-    this.url = postUrl,
-    this.channel = postChannel,
-    this.username = username
-  }
-  
-  
-  sendHttpPost() {
-    let jsonData =
-      {
-        "channel": this.channel,
-        "username": this.username,
-        "text": this.message,
-        "icon_emoji": ":panda_face:",
-      };
-    let payload = JSON.stringify(jsonData);
-    let options =
-      {
-        "method": "post",
-        "contentType": "application/json",
-        "payload": payload
-      };
-    UrlFetchApp.fetch(this.url,options); 
-  }
-}
-
-
 
 
 /* 
