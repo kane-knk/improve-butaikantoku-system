@@ -16,7 +16,7 @@ function checkDuplicationAndAddEvent(dat,i,status){
   if(status==0){
     id_column = 9;
     if(isActor(dat[i][1])){//役者ならば
-      let calender = ActorCal;
+      let calender = ActorAndDirectorCal;
     } else {//裏方ならば
       let calender = BackseatplayerCal;  
     }
