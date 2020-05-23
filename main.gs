@@ -7,9 +7,10 @@ function slackMentionByEvtSheet() {
   tomorrow.setDate(new Date().getDate()+1);//明日の日付
   for (i = 1; i < dat.length; i++) {
     let sDate = new Date(dat[i][2]);//シート上の日付を取得 
+    let message = null;
     if (sDate.getDate() == tomorrow.getDate()) {//日付が次の日ならば実行
-      if(dat[i][1] == "稽古") let.message = genAbsentMessage(dat,i);//イベントタイトルが「稽古」なら実行
-      if(dat[i][1] == "スタッフ会議")　let.message = genBasisMessage(dat,i);
+      if(dat[i][1] == "稽古") message = genAbsentMessage(dat,i);//イベントタイトルが「稽古」なら実行
+      if(dat[i][1] == "スタッフ会議") message = genBasisMessage(dat,i);
     }
     if (message) {
       let envelope = new Envelope(message);
@@ -21,8 +22,12 @@ function slackMentionByEvtSheet() {
 
 /* 個人予定の回答シートから、回答をカレンダーに反映 */
 function addTaskEvents(){
+  let AnswerSheet = spSheet.getSheetByName("個人予定フォーム");
   let ansDat = AnswerSheet.getDataRange().getValues(); //シートデータを取得
-  let i = 0 + systemDat[1][6];//チェック済みの行数をロード
+  
+  let i = PropertiesService.getScriptProperties().getProperty("CHECKED_ROW"); // チェック済みの行数をロード
+  i = (parseInt(i, 10));
+  if(!i) i = 1;
   
   for(;i<ansDat.length;i++){
     if(!ansDat[i][9]){//未チェックの回答ならば
@@ -30,7 +35,7 @@ function addTaskEvents(){
     }
   }
   AnswerSheet.getRange(1, 1, i, 10).setValues(ansDat);
-  ConstantsSheet.getRange("G2").setValue(i);//チェック済みの行数をセーブ
+  PropertiesService.getScriptProperties().setProperty("CHECKED_ROW",i); //チェック済みの行数をセーブ
 }
 
 
