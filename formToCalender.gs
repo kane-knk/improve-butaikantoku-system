@@ -1,3 +1,8 @@
+/* TODO: メンバーの役者演出チェックはMemberクラスのメソッドを使う このメソッドは削除する*/
+function isActor(name){
+  return ["やまぐち", "ﾋﾖ", "わたりょ", "たまるさとみ", "ﾂｶﾀﾞｿﾗ", "ふみふみ", "Natsumi"].includes(name);
+}
+
 /* 
 該当する回答について、過去と未来に重複がないかを調べ、
 過去の回答についてはカレンダーの削除処理、最新回答についてカレンダーの追加処理をし、datを返す
@@ -16,21 +21,19 @@ function checkDuplicationAndAddEvent(dat,i,status){
   if(status==0){
     id_column = 9;
     if(isActor(dat[i][1])){//役者ならば
-      let calender = ActorAndDirectorCal;
+      calender = ActorAndDirectorCal;
     } else {//裏方ならば
-      let calender = BackseatplayerCal;  
+      calender = BackseatplayerCal;  
     }
   } else if (status == 1){
     id_column = 7;
     calender = EventCal;
   }
-  
   /* 
   過去を検索　→　過去のデータは全てcheckされている前提
   過去回答のうち最新のものをチェック
   */
   for(let j=i-1;j>0;j--){
-    Logger.log(j);
     if(dat[j][1] == dat[i][1] && datesEqual(dat[j][2],dat[i][2])){//同一人物or稽古かつ同日の予定なら
       past_j = j;//イベント削除及びannounceChanege用にjを保持
       j = 0;//終了
@@ -40,6 +43,7 @@ function checkDuplicationAndAddEvent(dat,i,status){
         let evt = calender.getEventById(dat[past_j][id_column]);//過去のカレンダーイベントを削除
         evt.deleteEvent();
         /* イベント削除後にエラーが起こった場合、削除済みのイベントを削除できずエラーが誘発するため、即時に削除済みにデータ変更します */
+        /* TODO: トランザクション */
         AnswerSheet.getRange(past_j + 1,id_column + 1).setValue("deleated");
         dat[past_j][id_column] = "deleated";
       }
@@ -80,19 +84,21 @@ function checkAttendance(dat,i,calender){
   if(dat[i][3] == "参加できる"){
     dat[i][9] = "checked";
   } else { //参加できないor時間に制約がある
-    let repeat = 1;
-    if(dat[i][7]) repeat = dat[i][7];
-    let rec = CalendarApp.newRecurrence().addWeeklyRule().times(repeat);
+    daylyRepeat = (dat[i][7] == "日") ? dat[i][8] : 1; //三項演算子 条件 ? Trueの時の値 : falseの時の値
+    weeklyRepeat = (dat[i][7] == "週") ? dat[i][8] : 1;
+    let rec = CalendarApp.newRecurrence()
+                         .addDailyRule().times(daylyRepeat)
+                         .addWeeklyRule().times(weeklyRepeat);
     
     if(dat[i][3] == "参加できない"){
-      let eventSeries = calender.createAllDayEventSeries(dat[i][1],new Date(dat[i][2]),rec,
-                                                         {description : dat[i][4]});                                                    
+      let eventSeries = calender.createAllDayEventSeries(dat[i][1], new Date(dat[i][2]), rec, {description : dat[i][4]});                                                    
       dat[i][9] = eventSeries.getId();
-    } else {//時間に制約がある
-      if(dat[i][5]<dat[i][6]){//時間の前後関係が狂ってなければ
+    } else { //参加出来ない時間帯がある
+      if(dat[i][5]<dat[i][6]){ //時間の前後関係が狂ってなければ
         let dateArray = setSFDate(dat[i][2],dat[i][5],dat[i][6]);//開始時間と終了時間をdate型にし、配列に取得
-        let eventSeries = calender.createEventSeries(dat[i][1],dateArray[0],dateArray[1],rec,
-                                                     {description : dat[i][4]});
+        Logger.log(dateArray)
+        Logger.log(dat[i])
+        let eventSeries = calender.createEventSeries(dat[i][1], dateArray[0], dateArray[1], rec, {description : dat[i][4]});
         dat[i][9] = eventSeries.getId();
       } else {
         dat[i][9] = "checked";
@@ -103,22 +109,22 @@ function checkAttendance(dat,i,calender){
 }
 
 /* 
-日時を比較して、二週間以内なら、statusに沿ってmessageを作る関数を呼びsendHttpPost
+日時を比較して、1週間以内なら、statusに沿ってmessageを作る関数を呼びsendHttpPost
 statusは定数
 0→出席変更
 1→稽古予定変更
 */
 function announceChange(dat,i,j,status){
   let twoWeeksLater = new Date();
-  twoWeeksLater.setDate(twoWeeksLater.getDate() + 14);//二週間後
+  twoWeeksLater.setDate(twoWeeksLater.getDate() + 7);//1週間後
   
-  if(dat[j][2] > new Date() &&  dat[j][2] < twoWeeksLater){　//変更されたのが二週間以内の予定だった場合   
+  if(dat[j][2] > new Date() &&  dat[j][2] < twoWeeksLater){　//変更されたのが1週間以内の予定だった場合   
     if(status==0){
       let message = genAttendanceChanegeMessage(dat,i,j);
     }  else if(status==1){
       let message = genPracticeChangeMessage(dat,i,j);
     }
     let envelope = new Envelope(message);
-    envelope.sendHttpPost(); //slackで通知
+    envelope.sendHttpPost('test'); //slackで通知
   }
 }

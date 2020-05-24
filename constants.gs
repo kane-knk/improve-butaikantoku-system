@@ -9,7 +9,6 @@ let backseatplayerCalId = PropertiesService.getScriptProperties().getProperty("B
 //カレンダーを取得、名前は「"カレンダーを反映するシート名" + "Cal"」にする
 let EventCal = CalendarApp.getCalendarById(eventCalId);//全体スケジュールカレンダーを取得
 let ActorAndDirectorCal = CalendarApp.getCalendarById(actorAndDirectorCalId);
-Logger.log('hoge' + EventCal )
 let BackseatplayerCal = CalendarApp.getCalendarById(backseatplayerCalId);
 
 
@@ -25,9 +24,6 @@ let spSheet = SpreadsheetApp.openById(sheetID);
 //let DeadSheet = spSheet.getSheetByName("Dead");
 //let ConstantsSheet = spSheet.getSheetByName("SystemConstants");
 
-
-// シート上で定義する定数
-//let systemDat = ConstantsSheet.getDataRange().getValues();
 
 let postUrl = PropertiesService.getScriptProperties().getProperty('POST_URL');  //slackのWebhook URL
 let postChannel = PropertiesService.getScriptProperties().getProperty('POST_CHANNEL');  //ポストするスラックのチャンネル
@@ -70,22 +66,16 @@ function is(type, obj) {
 
 */
 
-//function isActor(name){//役者などのSystemConstantsシートE列に登録したメンバーならtrueを返す
-//  for(let i=1;i<　systemDat.length;i++){
-//    if(name == systemDat[i][4]) return true;
-//  }
-//  return false; 
-//}
-
 function datesEqual(date1,date2){//日付（月日）が等価ならtrueを返す
   return date1.getMonth() == date2.getMonth() && date1.getDate() == date2.getDate();
 }
 
 function setSFDate(date,start,finish){//開始時間と終了時間のStringをそれぞれDate型に入れることが多そうなので。2要素の配列に入れて返します
   let sDate = new Date(date);
-  let fDate = new Date(date);
+  let fDate = sDate;
   let sTime = new Date(start);
   let fTime = new Date(finish);
+  Logger.log([sDate, fDate, sTime, fTime])
   if(fTime.getHours() == 0 && fTime.getMinutes() == 0){//終了時間が0時の時、gas上では日付を跨いだ扱いにならないため、手動で+1
     fDate.setDate(fDate.getDate()+1);
   }
@@ -93,7 +83,7 @@ function setSFDate(date,start,finish){//開始時間と終了時間のStringを�
   sDate.setMinutes(sTime.getMinutes());     
   fDate.setHours(fTime.getHours());
   fDate.setMinutes(fTime.getMinutes()); 
-  
+  Logger.log([sDate, fDate])
   let array = [sDate,fDate];
   return array;
 }

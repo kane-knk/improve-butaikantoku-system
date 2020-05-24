@@ -7,15 +7,20 @@ class Envelope {
   constructor(message){
     this.message = message;
     this.url = PropertiesService.getScriptProperties().getProperty('POST_URL');  //slackのWebhook URL,
-    this.channel = PropertiesService.getScriptProperties().getProperty('POST_CHANNEL');  //ポストするスラックのチャンネル,
+    this.channel = PropertiesService.getScriptProperties().getProperty('POST_CHANNEL');  //ポストするスラックのチャンネル
+    this.testChannel = PropertiesService.getScriptProperties().getProperty('TEST_CHANNEL'); 
     this.username = PropertiesService.getScriptProperties().getProperty('WEBHOOKS_USER_NAME');  //slackでリマインドするbotの表示名
   }
   
-  
-  sendHttpPost() {
+  /**
+  * SlackにPost
+  * @param {string} test "test"という文字列が入ってきたらtestチャンネルにポスト
+  */
+  sendHttpPost(test) {
+    let channel = (test == "test" ? this.testChannel : this.channel);
     let jsonData =
         {
-          "channel": this.channel,
+          "channel": channel,
           "username": this.username,
           "text": this.message,
           "icon_emoji": ":panda_face:",
@@ -185,3 +190,15 @@ class Member{
   }
 }
 
+
+/**
+* formから入力されたスケジュールを管理するクラス task→用事
+* @constructor
+*/
+class Task {
+  constructor(name, date){
+    this.name = name;
+    this.date = date;
+    this.status = status; //参加できる、参加できない、参加できない時間帯がある
+  }
+}
