@@ -1,4 +1,4 @@
-/* TODO: メンバーの役者演出チェックはMemberクラスのメソッドを使う このメソッドは削除する*/
+/* TODO: メンバーの役者演出チェックはMemberクラスのメソッドを使う この関数は削除する*/
 function isActor(name){
   return ["やまぐち", "ﾋﾖ", "わたりょ", "たまるさとみ", "ﾂｶﾀﾞｿﾗ", "ふみふみ", "Natsumi"].includes(name);
 }
@@ -40,8 +40,12 @@ function checkDuplicationAndAddEvent(dat,i,status){
       
       /* 過去検索で得たpast_jについて削除処理 */
       if(!(dat[past_j][id_column] == "checked" || dat[past_j][id_column] == "deleated")){//IDの列が特定文字列ではないならば
-        let evt = calender.getEventById(dat[past_j][id_column]);//過去のカレンダーイベントを削除
-        evt.deleteEvent();
+        try{
+          let evt = calender.getEventById(dat[past_j][id_column]);//過去のカレンダーイベントを削除
+          evt.deleteEvent();
+        }catch(e){
+          Logger.log(e + " :at Row " + past_j);
+        }
         /* イベント削除後にエラーが起こった場合、削除済みのイベントを削除できずエラーが誘発するため、即時に削除済みにデータ変更します */
         /* TODO: トランザクション */
         AnswerSheet.getRange(past_j + 1,id_column + 1).setValue("deleated");
@@ -117,12 +121,12 @@ statusは定数
 function announceChange(dat,i,j,status){
   let twoWeeksLater = new Date();
   twoWeeksLater.setDate(twoWeeksLater.getDate() + 7);//1週間後
-  
+  let message = null;
   if(dat[j][2] > new Date() &&  dat[j][2] < twoWeeksLater){　//変更されたのが1週間以内の予定だった場合   
     if(status==0){
-      let message = genAttendanceChanegeMessage(dat,i,j);
+      message = genAttendanceChanegeMessage(dat,i,j);
     }  else if(status==1){
-      let message = genPracticeChangeMessage(dat,i,j);
+      message = genPracticeChangeMessage(dat,i,j);
     }
     let envelope = new Envelope(message);
     envelope.sendHttpPost('test'); //slackで通知

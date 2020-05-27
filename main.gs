@@ -22,7 +22,7 @@ function slackMentionByEvtSheet() {
 
 /* 個人予定の回答シートから、回答をカレンダーに反映 */
 function addTaskEvents(){
-  AnswerSheet = spSheet.getSheetByName("個人予定フォーム");
+  let AnswerSheet = spSheet.getSheetByName("個人予定フォーム");
   let ansDat = AnswerSheet.getDataRange().getValues(); //シートデータを取得
   
   let i = PropertiesService.getScriptProperties().getProperty("CHECKED_ROW"); // チェック済みの行数をロード
