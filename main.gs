@@ -22,7 +22,10 @@ function slackMentionByEvtSheet() {
 
 /* 個人予定の回答シートから、回答をカレンダーに反映 */
 function addTaskEvents(){
-  let answerSheet = spSheet.getSheetByName("個人予定フォーム");
+  let sheetName = "個人予定フォーム";
+  let columns = new SheetColumns(sheetName);
+  columns.setTaskSheetColmun();
+  let answerSheet = spSheet.getSheetByName(sheetName);
   let ansDat = answerSheet.getDataRange().getValues(); //シートデータを取得
   
   let i = PropertiesService.getScriptProperties().getProperty("CHECKED_ROW"); // チェック済みの行数をロード
@@ -30,26 +33,36 @@ function addTaskEvents(){
   if(!i) i = 1;
   
   for(;i<ansDat.length;i++){
-    if(!ansDat[i][9]){//未チェックの回答ならば
-      ansDat = checkDuplicationAndAddEvent(ansDat,i,0);      
+    if(!ansDat[i][columns.idColumn]){//未チェックの回答ならば
+      ansDat = checkDuplicationAndAddEvent(ansDat, i, columns);      
     }
   }
   answerSheet.getRange(1, 1, i, 10).setValues(ansDat);
-  PropertiesService.getScriptProperties().setProperty("CHECKED_ROW",i); //チェック済みの行数をセーブ
+  PropertiesService.getScriptProperties().setProperty("CHECKED_ROW", i); //チェック済みの行数をセーブ
 }
 
 
 /* 舞台監督用のフォームに入力した回答シートから、回答をカレンダーに反映 */
 function addTaskEventsForBukan() {
-  let practiceDat = PracticeSheet.getDataRange().getValues(); //シートデータを取得
-  let i = 0;
+  let sheetName = "稽古日程フォーム";
+  let columns = new SheetColumns(sheetName);
+  columns.setPracticeSheetColmun();
+  let practiceSheet = spSheet.getSheetByName(sheetName);
+  let practiceDat = practiceSheet.getDataRange().getValues(); //シートデータを取得
+  
+  let i = PropertiesService.getScriptProperties().getProperty("CHECKED_ROW_PRACTICE_SHEET"); // チェック済みの行数をロード
+  i = (parseInt(i, 10));
+  if(!i) i = 1;
   
   for(;i<practiceDat.length;i++){
-    if(!practiceDat[i][7]){//未チェックの回答ならば
-      practiceDat = checkDuplicationAndAddEvent(practiceDat,i,1);
+    if(!practiceDat[i][columns.idColumn]){//未チェックの回答ならば
+      practiceDat[i][columns.nameColumn] = practiceDat[i][columns.nameColumn] ? practiceDat[i][columns.nameColumn] : "稽古"; //三項演算子 条件 ? Trueの時の値 : falseの時の値
+      practiceDat[i][columns.locationColumn] = practiceDat[i][columns.locationColumn] ? practiceDat[i][columns.locationColumn] : "未定";
+      practiceDat = checkDuplicationAndAddEvent(practiceDat, i, columns);
     }    
   }
-  PracticeSheet.getRange(1,1,i,8).setValues(practiceDat);//データをシートに出力
+  practiceSheet.getRange(1,1,i,10).setValues(practiceDat);//データをシートに出力
+  PropertiesService.getScriptProperties().setProperty("CHECKED_ROW_PRACTICE_SHEET", i); //チェック済みの行数をセーブ
 }
 
 /* 締め切り入力用のフォームに入力した回答シートから、回答をカレンダーに反映 */

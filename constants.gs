@@ -92,9 +92,9 @@ function setSFDate(date,start,finish){//開始時間と終了時間のStringを�
 * 個人予定シートの指定の行から指定の行までのイベントをカレンダーから削除
 *
 */
-function debugDeleteFromSheet(i = 1, j = 21){
-  let AnswerSheet = spSheet.getSheetByName("個人予定フォーム");
-  let ansDat = AnswerSheet.getDataRange().getValues(); //シートデータを取得
+function debugDeleteFromSheet(i = 1, j = 3){
+  let answerSheet = spSheet.getSheetByName("個人予定フォーム");
+  let ansDat = answerSheet.getDataRange().getValues(); //シートデータを取得
   
   for(; i < j ; i++){
     let id = ansDat[i][9];
@@ -110,7 +110,7 @@ function debugDeleteFromSheet(i = 1, j = 21){
     }
     ansDat[i][9] = "";
   }
-  AnswerSheet.getRange(1, 1, ansDat.length, 10).setValues(ansDat);
+  answerSheet.getRange(1, 1, ansDat.length, 10).setValues(ansDat);
 }
 
 function debugDelete() {

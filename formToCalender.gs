@@ -8,34 +8,31 @@ function isActor(name){
 該当する回答について、過去と未来に重複がないかを調べ、
 過去の回答についてはカレンダーの削除処理、最新回答についてカレンダーの追加処理をし、datを返す
 
-statusは定数
-0→出席変更
-1→稽古予定変更
 id_columnはシートでイベントIDが記入される列、配列で使うので7(PracticeSheet)か9(AnswerSheet)
 */
-function checkDuplicationAndAddEvent(dat,i,status){      
+function checkDuplicationAndAddEvent(dat,i,columns){      
   let past_j;//過去に入力された予定の行を保持して、announceChangeに渡すための変数
   
   /* status毎に設定 */
-  let id_column = null;//IDのカラム（列）
   let calendar = null;
-  if(status==0){
-    id_column = 9;
-    if(isActor(dat[i][1])){//役者ならば
+  if(columns.sheetName == "個人予定フォーム"){
+    if(isActor(dat[i][columns.nameColumn])){//役者ならば
       calendar = actorAndDirectorCal;
     } else {//裏方ならば
       calendar = backseatplayerCal;  
     }
-  } else if (status == 1){
-    id_column = 7;
+  } else if (columns.sheetName == "稽古日程フォーム"){
     calendar = eventCal;
   }
+  
+  
   /* 
   過去を検索　→　過去のデータは全てcheckされている前提
   過去回答のうち最新のものをチェック
   */
   for(let j=i-1;j>0;j--){
-    if(dat[j][1] == dat[i][1] && datesEqual(dat[j][2],dat[i][2])){//同一人物or稽古かつ同日の予定なら
+    if(dat[j][columns.nameColumn] == dat[i][columns.nameColumn] 
+       && datesEqual(dat[j][columns.dateColumn],dat[i][columns.dateColumn])){//同一人物or稽古かつ同日の予定なら
       past_j = j;//イベント削除及びannounceChanege用にjを保持
       j = 0;//終了
       
@@ -45,73 +42,74 @@ function checkDuplicationAndAddEvent(dat,i,status){
           let evt = calendar.getEventById(dat[past_j][id_column]);//過去のカレンダーイベントを削除
           evt.deleteEvent();
         }catch(e){
-          Logger.log(e + " :at Row " + past_j + ", " + calendar);
+          Logger.log(e + " :at Row " + past_j + ", " + columns.sheetName);
         }
         /* イベント削除後にエラーが起こった場合、削除済みのイベントを削除できずエラーが誘発するため、即時に削除済みにデータ変更します */
         /* TODO: トランザクション */
-        AnswerSheet.getRange(past_j + 1,id_column + 1).setValue("deleated");
+        AnswerSheet.getRange(past_j + 1, id_column + 1).setValue("deleated");
         dat[past_j][id_column] = "deleated";
       }
     }
   }
   
   /* 未来を検索 → 最新の回答を発見するまで繰り返す必要がある　*/
-  for(j=i+1;j<dat.length;j++){
-    if(dat[j][1] == dat[i][1] && datesEqual(dat[j][2],dat[i][2])){//同一人物の同日の予定なら
-      dat[i][id_column] = "checked";//最新ではない行にはIDの欄にcheckedを入れる
+  for(j=i+1; j<dat.length; j++){
+    if(dat[j][columns.nameColumn] == dat[i][columns.nameColumn] 
+       && datesEqual(dat[j][columns.dateColumn],dat[i][columns.dateColumn])){//同一人物or稽古かつ同日の予定なら
+      dat[i][columns.idColumn] = "checked";//最新ではない行にはIDの欄にcheckedを入れる
       i = j;//iを最新の予定の行数とする
     }  
   }
   
   /* 未来検索で得た最新のiについて、statusに対応する処理をしcalendarに反映*/
-  if(status == 0){
-    checkAttendance(dat,i,calendar);
-  } else if (status == 1) {
-    if(dat[i][3] && dat[i][4]){//開始時間と終了時間が入力されているならば
-      if(dat[i][3]<dat[i][4]){//時間の前後関係が狂ってなければ
-        let dateArray = setSFDate(dat[i][2],dat[i][3],dat[i][4]);//開始時間と終了時間を配列に取得
-        let evt = 　eventCal.createEvent(dat[i][1],dateArray[0],dateArray[1],{location:dat[i][5],description:dat[i][6]});
-        dat[i][7]=evt.getId(); //イベントIDを入力 
-      }else{
-        dat[i][7]="checked";
-      }
-    } else　{
-      dat[i][7]="checked";
-    }
+  if(columns.sheetName == "個人予定フォーム"){ //参加できるとかの判定が必要なのでそっちに流す
+    checkAttendance(dat, i, calendar, columns);
+  } else if (columns.sheetName == "稽古日程フォーム") { //イベント作るだけ
+    createEventFromSheet(dat, i, calendar, columns);
   }
+    
   if(past_j) announceChange(dat,i,past_j,status);
   return dat;  
 }
 
 
 /* 未来検索により取得した最新の参加予定の回答について、イベントをカレンダーに追加 */
-function checkAttendance(dat,i,calendar){
-  if(dat[i][3] == "参加できる"){
-    dat[i][9] = "checked";
+function checkAttendance(dat, i, calendar, columns){
+  if(dat[i][columns.statusColumn] == "参加できる"){
+    dat[i][columns.idColumn] = "checked";
   } else { //参加できないor時間に制約がある
-    daylyRepeat = (dat[i][7] == "日") ? dat[i][8] : 1; //三項演算子 条件 ? Trueの時の値 : falseの時の値
-    weeklyRepeat = (dat[i][7] == "週") ? dat[i][8] : 1;
-    let rec = CalendarApp.newRecurrence()
-                         .addDailyRule().times(daylyRepeat)
-                         .addWeeklyRule().times(weeklyRepeat);
-    
-    if(dat[i][3] == "参加できない"){
-      let eventSeries = calendar.createAllDayEventSeries(dat[i][1], new Date(dat[i][2]), rec, {description : dat[i][4]});                                                    
-      dat[i][9] = eventSeries.getId();
-    } else { //参加出来ない時間帯がある
-      if(dat[i][5]<dat[i][6]){ //時間の前後関係が狂ってなければ
-        let dateArray = setSFDate(dat[i][2],dat[i][5],dat[i][6]);//開始時間と終了時間をdate型にし、配列に取得
-        Logger.log(dateArray)
-        Logger.log(dat[i])
-        let eventSeries = calendar.createEventSeries(dat[i][1], dateArray[0], dateArray[1], rec, {description : dat[i][4]});
-        dat[i][9] = eventSeries.getId();
-      } else {
-        dat[i][9] = "checked";
-      }
-    }
+    dat = createEventFromSheet(dat, i, calendar, columns);
   }
   return dat;
 }
+
+
+function createEventFromSheet(dat, i, calendar, columns){
+  daylyRepeat = (dat[i][columns.recurrenceRuleColumn] == "日") ? dat[i][columns.recurrenceNumColumn] : 1; //三項演算子 条件 ? Trueの時の値 : falseの時の値
+  weeklyRepeat = (dat[i][columns.recurrenceRuleColumn] == "週") ? dat[i][columns.recurrenceNumColumn] : 1;
+  let rec = CalendarApp.newRecurrence()
+                       .addDailyRule().times(daylyRepeat)
+                       .addWeeklyRule().times(weeklyRepeat);
+  let opt = {description : dat[i][columns.descriptionColumn]};
+  if (columns.sheetName == "稽古日程フォーム") {
+    opt.location = dat[i][columns.locationColumn];
+  }
+  
+  if(dat[i][columns.startTimeColumn] && dat[i][columns.finishTimeColumn]){ //開始時間と終了時間が入力されているならば
+    if(dat[i][columns.startTimeColumn] <= dat[i][columns.finishTimeColumn]){ //時間の前後関係が狂ってなければ
+      let dateArray = setSFDate(dat[i][columns.dateColumn], 
+                                dat[i][columns.startTimeColumn], dat[i][columns.finishTimeColumn]);//開始時間と終了時間をdate型にし、配列に取得
+      let eventSeries = calendar.createEventSeries(dat[i][columns.nameColumn], dateArray[0], dateArray[1], rec, opt);
+      dat[i][columns.idColumn] = eventSeries.getId();
+    } else { //時間の前後関係が狂ってる場合は登録処理はしない
+      dat[i][columns.idColumn] = "checked";
+    }
+  } else { // 開始時間と終了時間が入力されてなければ終日予定にする 
+    let eventSeries = calendar.createAllDayEventSeries(dat[i][columns.nameColumn], new Date(dat[i][columns.dateColumn]), rec, opt); 
+  }
+  return dat
+}
+
 
 /* 
 日時を比較して、1週間以内なら、statusに沿ってmessageを作る関数を呼びsendHttpPost
@@ -119,15 +117,15 @@ statusは定数
 0→出席変更
 1→稽古予定変更
 */
-function announceChange(dat,i,j,status){
+function announceChange(dat,i,j,columns){
   let twoWeeksLater = new Date();
   twoWeeksLater.setDate(twoWeeksLater.getDate() + 7);//1週間後
   let message = null;
   if(dat[j][2] > new Date() &&  dat[j][2] < twoWeeksLater){　//変更されたのが1週間以内の予定だった場合   
-    if(status==0){
-      message = genAttendanceChanegeMessage(dat,i,j);
-    }  else if(status==1){
-      message = genPracticeChangeMessage(dat,i,j);
+    if(columns.sheetName == "個人予定フォーム"){
+      message = genAttendanceChanegeMessage(dat, i, j);
+    }  else if(columns.sheetName == "稽古日程フォーム"){
+      message = genPracticeChangeMessage(dat, i, j);
     }
     let envelope = new Envelope(message);
     envelope.sendHttpPost('test'); //slackで通知
