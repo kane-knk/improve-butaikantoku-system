@@ -18,17 +18,17 @@ function checkDuplicationAndAddEvent(dat,i,status){
   
   /* status毎に設定 */
   let id_column = null;//IDのカラム（列）
-  let calender = null;
+  let calendar = null;
   if(status==0){
     id_column = 9;
     if(isActor(dat[i][1])){//役者ならば
-      calender = ActorAndDirectorCal;
+      calendar = actorAndDirectorCal;
     } else {//裏方ならば
-      calender = BackseatplayerCal;  
+      calendar = backseatplayerCal;  
     }
   } else if (status == 1){
     id_column = 7;
-    calender = EventCal;
+    calendar = eventCal;
   }
   /* 
   過去を検索　→　過去のデータは全てcheckされている前提
@@ -42,10 +42,10 @@ function checkDuplicationAndAddEvent(dat,i,status){
       /* 過去検索で得たpast_jについて削除処理 */
       if(!(dat[past_j][id_column] == "checked" || dat[past_j][id_column] == "deleated")){//IDの列が特定文字列ではないならば
         try{
-          let evt = calender.getEventById(dat[past_j][id_column]);//過去のカレンダーイベントを削除
+          let evt = calendar.getEventById(dat[past_j][id_column]);//過去のカレンダーイベントを削除
           evt.deleteEvent();
         }catch(e){
-          Logger.log(e + " :at Row " + past_j);
+          Logger.log(e + " :at Row " + past_j + ", " + calendar);
         }
         /* イベント削除後にエラーが起こった場合、削除済みのイベントを削除できずエラーが誘発するため、即時に削除済みにデータ変更します */
         /* TODO: トランザクション */
@@ -63,14 +63,14 @@ function checkDuplicationAndAddEvent(dat,i,status){
     }  
   }
   
-  /* 未来検索で得た最新のiについて、statusに対応する処理をしcalenderに反映*/
+  /* 未来検索で得た最新のiについて、statusに対応する処理をしcalendarに反映*/
   if(status == 0){
-    checkAttendance(dat,i,calender);
+    checkAttendance(dat,i,calendar);
   } else if (status == 1) {
     if(dat[i][3] && dat[i][4]){//開始時間と終了時間が入力されているならば
       if(dat[i][3]<dat[i][4]){//時間の前後関係が狂ってなければ
         let dateArray = setSFDate(dat[i][2],dat[i][3],dat[i][4]);//開始時間と終了時間を配列に取得
-        let evt = 　EventCal.createEvent(dat[i][1],dateArray[0],dateArray[1],{location:dat[i][5],description:dat[i][6]});
+        let evt = 　eventCal.createEvent(dat[i][1],dateArray[0],dateArray[1],{location:dat[i][5],description:dat[i][6]});
         dat[i][7]=evt.getId(); //イベントIDを入力 
       }else{
         dat[i][7]="checked";
@@ -85,7 +85,7 @@ function checkDuplicationAndAddEvent(dat,i,status){
 
 
 /* 未来検索により取得した最新の参加予定の回答について、イベントをカレンダーに追加 */
-function checkAttendance(dat,i,calender){
+function checkAttendance(dat,i,calendar){
   if(dat[i][3] == "参加できる"){
     dat[i][9] = "checked";
   } else { //参加できないor時間に制約がある
@@ -96,14 +96,14 @@ function checkAttendance(dat,i,calender){
                          .addWeeklyRule().times(weeklyRepeat);
     
     if(dat[i][3] == "参加できない"){
-      let eventSeries = calender.createAllDayEventSeries(dat[i][1], new Date(dat[i][2]), rec, {description : dat[i][4]});                                                    
+      let eventSeries = calendar.createAllDayEventSeries(dat[i][1], new Date(dat[i][2]), rec, {description : dat[i][4]});                                                    
       dat[i][9] = eventSeries.getId();
     } else { //参加出来ない時間帯がある
       if(dat[i][5]<dat[i][6]){ //時間の前後関係が狂ってなければ
         let dateArray = setSFDate(dat[i][2],dat[i][5],dat[i][6]);//開始時間と終了時間をdate型にし、配列に取得
         Logger.log(dateArray)
         Logger.log(dat[i])
-        let eventSeries = calender.createEventSeries(dat[i][1], dateArray[0], dateArray[1], rec, {description : dat[i][4]});
+        let eventSeries = calendar.createEventSeries(dat[i][1], dateArray[0], dateArray[1], rec, {description : dat[i][4]});
         dat[i][9] = eventSeries.getId();
       } else {
         dat[i][9] = "checked";

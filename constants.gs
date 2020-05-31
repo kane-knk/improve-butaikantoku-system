@@ -7,9 +7,9 @@ let backseatplayerCalId = PropertiesService.getScriptProperties().getProperty("B
 
 
 //カレンダーを取得、名前は「"カレンダーを反映するシート名" + "Cal"」にする
-let EventCal = CalendarApp.getCalendarById(eventCalId);//全体スケジュールカレンダーを取得
-let ActorAndDirectorCal = CalendarApp.getCalendarById(actorAndDirectorCalId);
-let BackseatplayerCal = CalendarApp.getCalendarById(backseatplayerCalId);
+let eventCal = CalendarApp.getCalendarById(eventCalId);//全体スケジュールカレンダーを取得
+let actorAndDirectorCal = CalendarApp.getCalendarById(actorAndDirectorCalId);
+let backseatplayerCal = CalendarApp.getCalendarById(backseatplayerCalId);
 
 
 //スプレッドシートを取得
@@ -101,9 +101,9 @@ function debugDeleteFromSheet(i = 1, j = 21){
     if(id && id != "checked" && id != "deleated"){ //idが入力されているならば
       let calendar = null;
       if(isActor(ansDat[i][1])){//役者ならば
-        calendar = ActorAndDirectorCal;
+        calendar = actorAndDirectorCal;
       } else {//裏方ならば
-        calendar = BackseatplayerCal;  
+        calendar = backseatplayerCal;  
       }
       let event = calendar.getEventById(id);
       event.deleteEvent();
@@ -115,7 +115,7 @@ function debugDeleteFromSheet(i = 1, j = 21){
 
 function debugDelete() {
   let del = new Date(2018,9,22,0,0,0); 
-  let events = ActorAndDirectorCal.getEventsForDay(del);
+  let events = actorAndDirectorCal.getEventsForDay(del);
   Logger.log(del);
   for(let n=0; n<events.length; n++){
     if(events[n].getTitle() == "name"){

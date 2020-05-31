@@ -100,10 +100,10 @@ class Member{
   */
   setSchedule(){
     if(this.isActorOrDirector){
-      Logger.log(ActorAndDirectorCal)
-      this.targetCal = ActorAndDirectorCal;
+      Logger.log(actorAndDirectorCal)
+      this.targetCal = actorAndDirectorCal;
     } else {
-      this.targetCal = BackseatplayerCal;
+      this.targetCal = backseatplayerCal;
     }
     
     // カレンダーIDの提供があるならば→ない場合はフォームから全員一律で処理

@@ -1,7 +1,7 @@
 //稽古日程をslackにmentionしたい！
 //稽古日程と日付を比較し実行
 function slackMentionByEvtSheet() {
-  saveCalenderToSheet("Event");
+  saveCalendarToSheet("Event");
   let dat = EventSheet.getDataRange().getValues();//イベントシートのデータを配列に取得
   let tomorrow = new Date()
   tomorrow.setDate(new Date().getDate()+1);//明日の日付
@@ -22,8 +22,8 @@ function slackMentionByEvtSheet() {
 
 /* 個人予定の回答シートから、回答をカレンダーに反映 */
 function addTaskEvents(){
-  let AnswerSheet = spSheet.getSheetByName("個人予定フォーム");
-  let ansDat = AnswerSheet.getDataRange().getValues(); //シートデータを取得
+  let answerSheet = spSheet.getSheetByName("個人予定フォーム");
+  let ansDat = answerSheet.getDataRange().getValues(); //シートデータを取得
   
   let i = PropertiesService.getScriptProperties().getProperty("CHECKED_ROW"); // チェック済みの行数をロード
   i = (parseInt(i, 10));
@@ -34,7 +34,7 @@ function addTaskEvents(){
       ansDat = checkDuplicationAndAddEvent(ansDat,i,0);      
     }
   }
-  AnswerSheet.getRange(1, 1, i, 10).setValues(ansDat);
+  answerSheet.getRange(1, 1, i, 10).setValues(ansDat);
   PropertiesService.getScriptProperties().setProperty("CHECKED_ROW",i); //チェック済みの行数をセーブ
 }
 
