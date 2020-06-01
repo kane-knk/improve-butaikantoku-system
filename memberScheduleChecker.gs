@@ -10,7 +10,7 @@ function memberScheduleCheck() {
   Logger.log(members);
   
   for(let member in members) {
-    if (member.calenderId){
+    if (member.calendarId){
       
     }
   }

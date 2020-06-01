@@ -100,10 +100,10 @@ class Member{
   */
   setSchedule(){
     if(this.isActorOrDirector){
-      Logger.log(ActorAndDirectorCal)
-      this.targetCal = ActorAndDirectorCal;
+      Logger.log(actorAndDirectorCal)
+      this.targetCal = actorAndDirectorCal;
     } else {
-      this.targetCal = BackseatplayerCal;
+      this.targetCal = backseatplayerCal;
     }
     
     // カレンダーIDの提供があるならば→ない場合はフォームから全員一律で処理
@@ -200,5 +200,53 @@ class Task {
     this.name = name;
     this.date = date;
     this.status = status; //参加できる、参加できない、参加できない時間帯がある
+  }
+}
+
+
+/**
+* formから入力されたシートデータの行と情報を結びつける
+* @constructor
+* @param{string} sheetName シートの名前
+*/
+class SheetColumns{
+  constructor(sheetName){
+    this.sheetName = sheetName;
+  }
+  
+  
+  /**
+  * 個人予定のシート設定
+  * @return {}
+  */
+  setTaskSheetColmun(){
+    this.idColumn = 9;
+    this.nameColumn = 1;
+    this.dateColumn = 2;
+    this.statusColumn = 3; //参加できる、できないetc
+    this.descriptionColumn = 4;
+    this.startTimeColumn = 5;
+    this.finishTimeColumn = 6;
+    
+    this.recurrenceRuleColumn = 7;
+    this.recurrenceNumColumn = 8;
+  }
+  
+  
+  /**
+  * 稽古日程のシート設定
+  * @return {}
+  */
+  setPracticeSheetColmun(){
+    this.idColumn = 9;
+    this.nameColumn = 1; //タイトル
+    this.dateColumn = 2;
+    this.startTimeColumn = 3;
+    this.finishTimeColumn = 4;
+    this.locationColumn = 5; //場所
+    this.descriptionColumn = 6;
+    
+    this.recurrenceRuleColumn = 7;
+    this.recurrenceNumColumn = 8;
   }
 }

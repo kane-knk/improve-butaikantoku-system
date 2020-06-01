@@ -1,4 +1,4 @@
-function saveCalenderToSheet(name) {
+function saveCalendarToSheet(name) {
   let sheet = spSheet.getSheetByName(name);//名前からシートを取得
   let cal = eval(name+"Cal");//constantsでルールに従って定義したカレンダーを取得
   sheet.getRange('1:100').clear();//実行の都度、初期化をする
