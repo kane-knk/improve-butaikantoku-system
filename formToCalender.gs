@@ -7,8 +7,6 @@ function isActor(name){
 /* 
 該当する回答について、過去と未来に重複がないかを調べ、
 過去の回答についてはカレンダーの削除処理、最新回答についてカレンダーの追加処理をし、datを返す
-
-id_columnはシートでイベントIDが記入される列、配列で使うので7(PracticeSheet)か9(AnswerSheet)
 */
 function checkDuplicationAndAddEvent(dat,i,columns){      
   let past_j;//過去に入力された予定の行を保持して、announceChangeに渡すための変数
@@ -37,17 +35,17 @@ function checkDuplicationAndAddEvent(dat,i,columns){
       j = 0;//終了
       
       /* 過去検索で得たpast_jについて削除処理 */
-      if(!(dat[past_j][id_column] == "checked" || dat[past_j][id_column] == "deleated")){//IDの列が特定文字列ではないならば
+      if(!(dat[past_j][columns.idColumn] == "checked" || dat[past_j][columns.idColumn] == "deleated")){//IDの列が特定文字列ではないならば
         try{
-          let evt = calendar.getEventById(dat[past_j][id_column]);//過去のカレンダーイベントを削除
+          let evt = calendar.getEventById(dat[past_j][columns.idColumn]);//過去のカレンダーイベントを削除
           evt.deleteEvent();
         }catch(e){
           Logger.log(e + " :at Row " + past_j + ", " + columns.sheetName);
         }
         /* イベント削除後にエラーが起こった場合、削除済みのイベントを削除できずエラーが誘発するため、即時に削除済みにデータ変更します */
         /* TODO: トランザクション */
-        AnswerSheet.getRange(past_j + 1, id_column + 1).setValue("deleated");
-        dat[past_j][id_column] = "deleated";
+        answerSheet.getRange(past_j + 1, columns.idColumn + 1).setValue("deleated");
+        dat[past_j][columns.idColumn] = "deleated";
       }
     }
   }
@@ -68,7 +66,7 @@ function checkDuplicationAndAddEvent(dat,i,columns){
     createEventFromSheet(dat, i, calendar, columns);
   }
     
-  if(past_j) announceChange(dat,i,past_j,status);
+  if(past_j) announceChange(dat,i,past_j,columns);
   return dat;  
 }
 

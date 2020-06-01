@@ -24,6 +24,9 @@ let spSheet = SpreadsheetApp.openById(sheetID);
 //let DeadSheet = spSheet.getSheetByName("Dead");
 //let ConstantsSheet = spSheet.getSheetByName("SystemConstants");
 
+// TODO: 使うとこでだけ定義して使いたい
+let answerSheet = spSheet.getSheetByName("個人予定フォーム");
+
 
 let postUrl = PropertiesService.getScriptProperties().getProperty('POST_URL');  //slackのWebhook URL
 let postChannel = PropertiesService.getScriptProperties().getProperty('POST_CHANNEL');  //ポストするスラックのチャンネル
