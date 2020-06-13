@@ -1,13 +1,15 @@
 //いくつかの定数と基礎的な関数を記述するファイル
 
 //カレンダーID
-let EventCalId = PropertiesService.getScriptProperties().getProperty("EVENT_CALENDER_ID");
+let eventCalId = PropertiesService.getScriptProperties().getProperty("EVENT_CALENDAR_ID");
+let actorAndDirectorCalId = PropertiesService.getScriptProperties().getProperty("ACTOR_AND_DIRECTOR_CALENDAR_ID");
+let backseatplayerCalId = PropertiesService.getScriptProperties().getProperty("BACKSEATPLAYER_CALENDAR_ID");
 
 
 //カレンダーを取得、名前は「"カレンダーを反映するシート名" + "Cal"」にする
-let EventCal = CalendarApp.getCalendarById(EventCalId);//イベントカレンダーを取得
-let ActorCal = CalendarApp.getCalendarById('b8pd4kib7k4ilcf3atosuhbu5o@group.calendar.google.com');
-let BackseatplayerCal = CalendarApp.getCalendarById('7c9gfdvacreauvddo7eujld3do@group.calendar.google.com');
+let eventCal = CalendarApp.getCalendarById(eventCalId);//全体スケジュールカレンダーを取得
+let actorAndDirectorCal = CalendarApp.getCalendarById(actorAndDirectorCalId);
+let backseatplayerCal = CalendarApp.getCalendarById(backseatplayerCalId);
 
 
 //スプレッドシートを取得
@@ -15,16 +17,16 @@ let sheetID = PropertiesService.getScriptProperties().getProperty("SHEET_ID");
 let spSheet = SpreadsheetApp.openById(sheetID);
 
 /*各シートを取得*/
-let EventSheet = spSheet.getSheetByName("Event");
-let Actor = spSheet.getSheetByName("Actor");
-let AnswerSheet = spSheet.getSheetByName("Answer"); 
-let PracticeSheet = spSheet.getSheetByName("PracticeDay");
-let DeadSheet = spSheet.getSheetByName("Dead");
-let ConstantsSheet = spSheet.getSheetByName("SystemConstants");
+//let EventSheet = spSheet.getSheetByName("Event");
+//let Actor = spSheet.getSheetByName("Actor");
+//let AnswerSheet = spSheet.getSheetByName("Answer"); 
+//let PracticeSheet = spSheet.getSheetByName("PracticeDay");
+//let DeadSheet = spSheet.getSheetByName("Dead");
+//let ConstantsSheet = spSheet.getSheetByName("SystemConstants");
 
+// TODO: 使うとこでだけ定義して使いたい
+let answerSheet = spSheet.getSheetByName("個人予定フォーム");
 
-// シート上で定義する定数
-//let systemDat = ConstantsSheet.getDataRange().getValues();
 
 let postUrl = PropertiesService.getScriptProperties().getProperty('POST_URL');  //slackのWebhook URL
 let postChannel = PropertiesService.getScriptProperties().getProperty('POST_CHANNEL');  //ポストするスラックのチャンネル
@@ -66,12 +68,6 @@ function is(type, obj) {
 オリジナルの関数
 
 */
-function isActor(name){//役者などのSystemConstantsシートE列に登録したメンバーならtrueを返す
-  for(let i=1;i<　systemDat.length;i++){
-    if(name == systemDat[i][4]) return true;
-  }
-  return false; 
-}
 
 function datesEqual(date1,date2){//日付（月日）が等価ならtrueを返す
   return date1.getMonth() == date2.getMonth() && date1.getDate() == date2.getDate();
@@ -82,6 +78,7 @@ function setSFDate(date,start,finish){//開始時間と終了時間のStringを�
   let fDate = new Date(date);
   let sTime = new Date(start);
   let fTime = new Date(finish);
+  Logger.log([sDate, fDate, sTime, fTime])
   if(fTime.getHours() == 0 && fTime.getMinutes() == 0){//終了時間が0時の時、gas上では日付を跨いだ扱いにならないため、手動で+1
     fDate.setDate(fDate.getDate()+1);
   }
@@ -89,14 +86,39 @@ function setSFDate(date,start,finish){//開始時間と終了時間のStringを�
   sDate.setMinutes(sTime.getMinutes());     
   fDate.setHours(fTime.getHours());
   fDate.setMinutes(fTime.getMinutes()); 
-  
+  Logger.log([sDate, fDate])
   let array = [sDate,fDate];
   return array;
 }
 
-function DebugDelete() {
+/**
+* 個人予定シートの指定の行から指定の行までのイベントをカレンダーから削除
+*
+*/
+function debugDeleteFromSheet(i = 1, j = 3){
+  let answerSheet = spSheet.getSheetByName("個人予定フォーム");
+  let ansDat = answerSheet.getDataRange().getValues(); //シートデータを取得
+  
+  for(; i < j ; i++){
+    let id = ansDat[i][9];
+    if(id && id != "checked" && id != "deleated"){ //idが入力されているならば
+      let calendar = null;
+      if(isActor(ansDat[i][1])){//役者ならば
+        calendar = actorAndDirectorCal;
+      } else {//裏方ならば
+        calendar = backseatplayerCal;  
+      }
+      let event = calendar.getEventById(id);
+      event.deleteEvent();
+    }
+    ansDat[i][9] = "";
+  }
+  answerSheet.getRange(1, 1, ansDat.length, 10).setValues(ansDat);
+}
+
+function debugDelete() {
   let del = new Date(2018,9,22,0,0,0); 
-  let events = ActorCal.getEventsForDay(del);
+  let events = actorAndDirectorCal.getEventsForDay(del);
   Logger.log(del);
   for(let n=0; n<events.length; n++){
     if(events[n].getTitle() == "name"){
