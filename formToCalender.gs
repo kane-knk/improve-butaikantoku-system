@@ -35,7 +35,7 @@ function checkDuplicationAndAddEvent(dat,i,columns){
       j = 0;//終了
       
       /* 過去検索で得たpast_jについて削除処理 */
-      if(!(dat[past_j][columns.idColumn] == "checked" || dat[past_j][columns.idColumn] == "deleated")){//IDの列が特定文字列ではないならば
+      if(!(dat[past_j][columns.idColumn] == "checked" || dat[past_j][columns.idColumn] == "deleted")){//IDの列が特定文字列ではないならば
         try{
           let evt = calendar.getEventById(dat[past_j][columns.idColumn]);//過去のカレンダーイベントを削除
           evt.deleteEvent();
@@ -44,8 +44,8 @@ function checkDuplicationAndAddEvent(dat,i,columns){
         }
         /* イベント削除後にエラーが起こった場合、削除済みのイベントを削除できずエラーが誘発するため、即時に削除済みにデータ変更します */
         /* TODO: トランザクション */
-        answerSheet.getRange(past_j + 1, columns.idColumn + 1).setValue("deleated");
-        dat[past_j][columns.idColumn] = "deleated";
+        answerSheet.getRange(past_j + 1, columns.idColumn + 1).setValue("deleted");
+        dat[past_j][columns.idColumn] = "deleted";
       }
     }
   }
@@ -103,7 +103,8 @@ function createEventFromSheet(dat, i, calendar, columns){
       dat[i][columns.idColumn] = "checked";
     }
   } else { // 開始時間と終了時間が入力されてなければ終日予定にする 
-    let eventSeries = calendar.createAllDayEventSeries(dat[i][columns.nameColumn], new Date(dat[i][columns.dateColumn]), rec, opt); 
+    let eventSeries = calendar.createAllDayEventSeries(dat[i][columns.nameColumn], new Date(dat[i][columns.dateColumn]), rec, opt);
+    dat[i][columns.idColumn] = eventSeries.getId();
   }
   return dat
 }
