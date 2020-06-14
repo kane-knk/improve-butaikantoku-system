@@ -1,12 +1,19 @@
 //稽古日程をslackにmentionしたい！
 //稽古日程と日付を比較し実行
 function slackMentionByEvtSheet() {
-  saveCalendarToSheet("Event");
-  let dat = EventSheet.getDataRange().getValues();//イベントシートのデータを配列に取得
-  let tomorrow = new Date()
+  let sheetName = "event";
+  saveCalendarToSheet(sheetName);
+  // let columns = new SheetColumns(sheetName); 
+  // columns.setTaskSheetColmun();
+  // todo: columnsで制御
+  let eventSheet = spSheet.getSheetByName(sheetName);
+  let dat = eventSheet.getDataRange().getValues();//イベントシートのデータを配列に取得
+  let tomorrow = new Date();
   tomorrow.setDate(new Date().getDate()+1);//明日の日付
-  for (i = 1; i < dat.length; i++) {
+  for (i = 0; i < dat.length; i++) {
     let sDate = new Date(dat[i][2]);//シート上の日付を取得 
+    Logger.log(sDate);
+    Logger.log(tomorrow)
     let message = null;
     if (sDate.getDate() == tomorrow.getDate()) {//日付が次の日ならば実行
       if(dat[i][1] == "稽古") message = genAbsentMessage(dat,i);//イベントタイトルが「稽古」なら実行

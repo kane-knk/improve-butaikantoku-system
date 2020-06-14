@@ -12,14 +12,19 @@ function genBasisMessage(dat,i){
 
 //messageの欠席者連絡部分を作り、基礎部分を呼んで結合
 function genAbsentMessage(dat,i) {
-  saveCalenderToSheet("Actor");
+  let sheetName = "actorAndDirector";
+  saveCalendarToSheet(sheetName);
+  
+  let actorSheet = spSheet.getSheetByName(sheetName);
+  let actorDat = actorSheet.getDataRange().getValues();
   
   let tomorrow = new Date()
   tomorrow.setDate(tomorrow.getDate()+1);//明日の日付
-  let actorDat = Actor.getDataRange().getValues();
+
   let pracArray = setSFDate(dat[i][2],dat[i][4],dat[i][7]);//イベントカレンダー用シートより、稽古の開始、終了時間を配列に取得
   let tomorrowAbs = [];
   let counter = 0;
+  let message = null;
   
   for(let j = 0; j < actorDat.length;j++){
     let absArray = setSFDate(actorDat[j][2],actorDat[j][4],actorDat[j][7]);//役者演出カレンダー用シートより、欠席の開始、終了時間を配列に取得
@@ -55,9 +60,9 @@ function genAbsentMessage(dat,i) {
       }
       absMessage += (tomorrowAbs[j][0] + "さんは" + absSTime + "～" + absFTime + "まで\n");
     } 
-    let message = (genBasisMessage(dat,i) + '\n' + "また、" + absMessage +"欠席です！よろしく！")    
+    message = (genBasisMessage(dat,i) + '\n' + "また、" + absMessage +"欠席です！よろしく！")    
     }else{
-      let message = (genBasisMessage(dat,i) + "よろしく！");
+    message = (genBasisMessage(dat,i) + "よろしく！");
     }
   return message;
 }

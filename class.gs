@@ -42,14 +42,14 @@ class Envelope {
 * @constructor
 * @param{string} name 名前
 * @param{array} job 役職
-* @param{string} calenderId member個人のカレンダーのId
+* @param{string} calendarId member個人のカレンダーのId
 * @param{object} targetCal スケジュールを反映するカレンダーのId
 */
 class Member{
-  constructor(name, job, calenderId){
+  constructor(name, job, calendarId){
     this.name = name;
     this.job = job;
-    this.calenderId = calenderId;
+    this.calendarId = calendarId;
     this.targetCal = null;
   }
   
@@ -80,8 +80,8 @@ class Member{
   getMember(datLine){
     let name = datLine[1];
     let job = datLine[2].split(", ");
-    let calenderId = datLine[4];
-    let member = new this.constructor(name, job, calenderId);
+    let calendarId = datLine[4];
+    let member = new this.constructor(name, job, calendarId);
     return member
   }
   
@@ -107,8 +107,8 @@ class Member{
     }
     
     // カレンダーIDの提供があるならば→ない場合はフォームから全員一律で処理
-    if(this.calenderId){
-      let memberCal = CalendarApp.getCalendarById(this.calenderId); // 個人カレンダーを取得 
+    if(this.calendarId){
+      let memberCal = CalendarApp.getCalendarById(this.calendarId); // 個人カレンダーを取得 
       
       let checkStart = new Date()
       checkStart.setDate(new Date().getDate() + 3); // 3日後から
