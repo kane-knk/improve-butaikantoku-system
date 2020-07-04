@@ -3,13 +3,13 @@
 //カレンダーID
 let eventCalId = PropertiesService.getScriptProperties().getProperty("EVENT_CALENDAR_ID");
 let actorAndDirectorCalId = PropertiesService.getScriptProperties().getProperty("ACTOR_AND_DIRECTOR_CALENDAR_ID");
-let backseatplayerCalId = PropertiesService.getScriptProperties().getProperty("BACKSEATPLAYER_CALENDAR_ID");
+let backseatPlayerCalId = PropertiesService.getScriptProperties().getProperty("BACKSEATPLAYER_CALENDAR_ID");
 
 
 //カレンダーを取得、名前は「"カレンダーを反映するシート名" + "Cal"」にする
 let eventCal = CalendarApp.getCalendarById(eventCalId);//全体スケジュールカレンダーを取得
 let actorAndDirectorCal = CalendarApp.getCalendarById(actorAndDirectorCalId);
-let backseatplayerCal = CalendarApp.getCalendarById(backseatplayerCalId);
+let backseatPlayerCal = CalendarApp.getCalendarById(backseatPlayerCalId);
 
 
 //スプレッドシートを取得

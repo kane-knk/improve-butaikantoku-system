@@ -17,7 +17,7 @@ function checkDuplicationAndAddEvent(dat,i,columns){
     if(isActor(dat[i][columns.nameColumn])){//役者ならば
       calendar = actorAndDirectorCal;
     } else {//裏方ならば
-      calendar = backseatplayerCal;  
+      calendar = backseatPlayerCal;  
     }
   } else if (columns.sheetName == "稽古日程フォーム"){
     calendar = eventCal;

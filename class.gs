@@ -16,7 +16,7 @@ class Envelope {
   * SlackにPost
   * @param {string} test "test"という文字列が入ってきたらtestチャンネルにポスト
   */
-  sendHttpPost(test) {
+  sendHttpPost(test = null) {
     let channel = (test == "test" ? this.testChannel : this.channel);
     let jsonData =
         {
@@ -103,7 +103,7 @@ class Member{
       Logger.log(actorAndDirectorCal)
       this.targetCal = actorAndDirectorCal;
     } else {
-      this.targetCal = backseatplayerCal;
+      this.targetCal = backseatPlayerCal;
     }
     
     // カレンダーIDの提供があるならば→ない場合はフォームから全員一律で処理

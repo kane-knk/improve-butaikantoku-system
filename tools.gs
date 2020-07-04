@@ -71,7 +71,7 @@ function debugDeleteFromSheet(i = 1, j = 3){
       if(isActor(ansDat[i][1])){//役者ならば
         calendar = actorAndDirectorCal;
       } else {//裏方ならば
-        calendar = backseatplayerCal;  
+        calendar = backseatPlayerCal;  
       }
       let event = calendar.getEventById(id);
       event.deleteEvent();
@@ -81,13 +81,16 @@ function debugDeleteFromSheet(i = 1, j = 3){
 }
 
 function debugDelete() {
-  let del = new Date(2018,9,22,0,0,0); 
-  let events = actorAndDirectorCal.getEventsForDay(del);
+  let del = new Date(2020,6,19,0,0,0); // note: month は -1 ex) 2020年7月4日→(2020,6,4,0,0,0)
+  //let cal = actorAndDirectorCal;
+  let cal = backseatPlayerCal;
+  let events = cal.getEventsForDay(del);
   Logger.log(del);
   for(let n=0; n<events.length; n++){
-    if(events[n].getTitle() == "name"){
+    if(events[n].getTitle() == "name"){ // note: 使うときに name を変える
       Logger.log(events[n].getTitle());
       events[n].deleteEvent()
+      if(n%50 == 0 && n != 0) Utilities.sleep(1000)
     }
   }
 }
