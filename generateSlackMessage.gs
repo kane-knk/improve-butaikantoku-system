@@ -47,16 +47,16 @@ function genAbsentMessage(dat,i) {
     }
   }
   Logger.log(tomorrowAbs);
-  if(tomorrowAbs){       
+  if(tomorrowAbs != null){       
     let absMessage = "";             
     for(let j = 0;j < tomorrowAbs.length;j++){  
       absSTime = tomorrowAbs[j][1];
       absFTime = tomorrowAbs[j][2];
       if(absSTime != "稽古開始") {
-        let absSTime = formTime(new Date(tomorrowAbs[j][1]));
+        absSTime = formTime(tomorrowAbs[j][1]);
       }
       if(absFTime != "稽古終了") {
-        let absFTime = formTime(new Date(tomorrowAbs[j][2]));
+        absFTime = formTime(tomorrowAbs[j][2]);
       }
       absMessage += (tomorrowAbs[j][0] + "さんは" + absSTime + "～" + absFTime + "まで\n");
     } 
