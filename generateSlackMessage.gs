@@ -4,7 +4,7 @@ function genBasisMessage(dat,i){
   
   let message =("こんにちは！明日"+ formDate(new Date(dat[i][2])) + "(" + dayInJP +")の" + dat[i][1] + "は" + 
     formTime(new Date(dat[i][4])) + "〜" + formTime(new Date(dat[i][7])) +
-      "で、場所は" + dat[i][8] +"です！よろしく！");
+      "で、場所は" + dat[i][8] +"です！");
   
   if(dat[i][9] != "nothing") message += "\n備考："+ dat[i][9]; 
   return message;
