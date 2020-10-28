@@ -47,7 +47,7 @@ function genAbsentMessage(dat,i) {
     }
   }
   Logger.log(tomorrowAbs);
-  if(tomorrowAbs != null){       
+  if(tomorrowAbs.length){       
     let absMessage = "";             
     for(let j = 0;j < tomorrowAbs.length;j++){  
       absSTime = tomorrowAbs[j][1];
@@ -61,9 +61,9 @@ function genAbsentMessage(dat,i) {
       absMessage += (tomorrowAbs[j][0] + "さんは" + absSTime + "～" + absFTime + "まで\n");
     } 
     message = (genBasisMessage(dat,i) + '\n' + "また、" + absMessage +"欠席です！よろしく！")    
-    }else{
+  }else{
     message = (genBasisMessage(dat,i) + "よろしく！");
-    }
+  }
   return message;
 }
 
